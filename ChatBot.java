@@ -114,6 +114,15 @@ public class ChatBot{
 
         }
 
+        else if (input.toLowerCase().contains("stop")){
+            if (tired){
+                System.out.println("BeeMO: Thank god.");
+            }
+            else{
+                System.out.println("BeeMO: Goodbye! See you next time.");
+            }
+        }
+
         else {
             discussion(2, scan, discussionCount, name);
         }
