@@ -44,7 +44,7 @@ public class ChatBot{
         String input = scan.nextLine();
 
 
-        //the honor discussion path
+
         if (input.toLowerCase().contains("honor")){
             if (tired){
                 System.out.print("Tired BeeMO: Honor's cool I guess. Do you agree that \"life is short, but honor lives forever\"?\n" + name + ": ");
@@ -154,8 +154,67 @@ public class ChatBot{
 
 
 
-        else if (input.toLowerCase().contains("rodents")){
+        else if (input.toLowerCase().contains("rodent")){
+            if (tired){
+                System.out.print("Tired BeeMO: What rodent do you like?\n" + name + ": ");
+            }
+            else{
+                System.out.print("BeeMO: Rodents sure are wonderous. One of the few species to survive the dinosaur extinction was a small bouncy rodent. Do you have a favorite rodent?\n" + name + ": ");
+            }
+
+            input = scan.nextLine();
+
+            if (input.toLowerCase().contains("rat")){
+                if (tired){
+                    System.out.print("Tired BeeMO: Ah, I bet you can relate to them. What do you like about them?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: Rats really are great. They're smart, cute and make great pets. Many would say that rats are the most popular rodent in the world. What's your favorite thing about rats?\n" + name + ": ");
+                }
+            }
             
+            else if (input.toLowerCase().contains("guinea") || input.toLowerCase().contains("chinchil") || input.toLowerCase().contains("capybara")){
+                if (tired){
+                    System.out.print("Tired BeeMO: They're quite big for rodents, just like you probably are for humans. What do you like about them?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: That's nice! You seem to like the bigger rodents. What's your favorite thing about them?\n" + name + ": ");
+                }
+            }
+
+            else if (input.toLowerCase().contains("mouse") || input.toLowerCase().contains("hamster")){
+                if (tired){
+                    System.out.print("Tired BeeMO: You like the tiniest and cutest rodents? Do they not remind you of a certain something unpleasant? What do you like about them?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: Those tiny rodents really are great bundles of joy. What about them do you enjoy most?\n" + name + ": ");
+                }
+            }
+
+            else if (input.toLowerCase().contains("no")){
+                if (tired){
+                    System.out.print("Tired BeeMO: You don't like any rodents? And here I thought my view of you couldn't get any lower. Wanna talk again?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: You don't like rodents? Well to each their own, let's change the subject. Would you like to have another conversation?\n" + name + ": ");
+                }
+                
+                repeatDiscussion(scan, discussionCount, name);
+           }
+
+            else {
+                discussion(2, scan, discussionCount, name);
+            }
+        
+            if (tired){
+                System.out.print("Tired BeeMO: Yeah, that's really nice. Wanna talk again?\n" + name + ": ");
+            }
+            else{
+                System.out.print("BeeMO: Rodents really are special no matter how we look at them. Would you like to have another conversation?\n" + name + ": ");
+            }
+
+            repeatDiscussion(scan, discussionCount, name);
+
         }
 
 
@@ -172,7 +231,7 @@ public class ChatBot{
 
         else if (input.toLowerCase().contains("stop") || input.toLowerCase().contains("bye")){
             if (tired){
-                System.out.println("BeeMO: Thank god.");
+                System.out.println("Tired BeeMO: Thank god.");
             }
             else{
                 System.out.println("BeeMO: Goodbye! See you next time.");
