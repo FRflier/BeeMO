@@ -70,30 +70,60 @@ public class ChatBot{
                         System.out.print("BeeMO: Well hoop-dee-doo we have a hero over here. You wanna talk again?\n" + name + ": ");
                     }
                     else{
-                        System.out.print("BeeMO: It's nice to hear that honor is a core value of yours! People most likely don't hesitate to designate you as a leading figure when the situation calls for it. Would you llike to have another conversation?\n" + name + ": ");
+                        System.out.print("BeeMO: It's nice to hear that honor is a core value of yours! People most likely don't hesitate to designate you as a leading figure when the situation calls for it. Would you like to have another conversation?\n" + name + ": ");
                     }
                     
-                    discussionCount += 1;
-                    if (discussionCount >= 3){
-                        tired = true;
-                    }
+                    repeatDiscussion(scan, discussionCount, name);
+                }
 
-                    input = scan.nextLine();
-                    if (input.toLowerCase().contains("ye")){
-                        discussion(1, scan, discussionCount, name);
+                if (input.toLowerCase().contains("no")){
+                    if (tired){
+                        System.out.print("BeeMO: Well hoop-dee-doo we have a hero over here. You wanna talk again?\n" + name + ": ");
                     }
-                    else {
-                        if (tired){
-                            System.out.println("BeeMO: Thank god.");
-                        }
-                        else{
-                            System.out.println("BeeMO: Goodbye! See you next time.");
-                        }
+                    else{
+                        System.out.print("BeeMO: It's nice to hear that honor is a core value of yours! People most likely don't hesitate to designate you as a leading figure when the situation calls for it. Would you like to have another conversation?\n" + name + ": ");
                     }
-    
+                    
+                    repeatDiscussion(scan, discussionCount, name);
                 }
             }
 
+            else if (input.toLowerCase().contains("no")){
+                if (tired){
+                    System.out.print("BeeMO: Could've guessed huh?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: You would have done great in ancient Rome! Would you say that honor ranks very highly among your values?\n" + name + ": ");
+                }
+
+                input = scan.nextLine();
+
+                if (input.toLowerCase().contains("ye")){
+                    if (tired){
+                        System.out.print("BeeMO: Well hoop-dee-doo we have a hero over here. You wanna talk again?\n" + name + ": ");
+                    }
+                    else{
+                        System.out.print("BeeMO: It's nice to hear that honor is a core value of yours! People most likely don't hesitate to designate you as a leading figure when the situation calls for it. Would you llike to have another conversation?\n" + name + ": ");
+                    }
+
+                    repeatDiscussion(scan, discussionCount, name);
+                }
+
+                if (input.toLowerCase().contains("no")){
+                    if (tired){
+                        System.out.print("BeeMO: Well hoop-dee-doo we have a hero over here. You wanna talk again?\n" + name + ": ");
+                    }
+                    else{
+                        System.out.print("BeeMO: It's nice to hear that honor is a core value of yours! People most likely don't hesitate to designate you as a leading figure when the situation calls for it. Would you llike to have another conversation?\n" + name + ": ");
+                    }
+                    
+                    repeatDiscussion(scan, discussionCount, name);
+                }
+            }
+
+            else {
+                discussion(2, scan, discussionCount, name);
+            }
         }
 
 
@@ -114,7 +144,7 @@ public class ChatBot{
 
         }
 
-        else if (input.toLowerCase().contains("stop")){
+        else if (input.toLowerCase().contains("stop") || input.toLowerCase().contains("bye")){
             if (tired){
                 System.out.println("BeeMO: Thank god.");
             }
@@ -126,6 +156,26 @@ public class ChatBot{
         else {
             discussion(2, scan, discussionCount, name);
         }
-
     }
+
+    public void repeatDiscussion(Scanner scan, int discussionCount, String name){
+        discussionCount += 1;
+        if (discussionCount >= 3){
+            tired = true;
+        }
+
+        String input = scan.nextLine();
+        if (input.toLowerCase().contains("ye")){
+            discussion(1, scan, discussionCount, name);
+        }
+        else {
+            if (tired){
+                System.out.println("BeeMO: Thank god.");
+            }
+            else{
+                System.out.println("BeeMO: Goodbye! See you next time.");
+            }
+        }
+    }
+
 }
