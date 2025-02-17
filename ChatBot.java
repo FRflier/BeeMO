@@ -200,17 +200,17 @@ public class ChatBot{
                 }
                 
                 repeatDiscussion(scan, discussionCount, name);
-           }
+            }
 
             else {
                 discussion(2, scan, discussionCount, name);
             }
         
             if (tired){
-                System.out.print("Tired BeeMO: Yeah, that's really nice. Wanna talk again?\n" + name + ": ");
+                System.out.print("Tired BeeMO: Yeah, that is really nice. Wanna talk again?\n" + name + ": ");
             }
             else{
-                System.out.print("BeeMO: Rodents really are exceptional no matter what they do. Would you like to have another conversation?\n" + name + ": ");
+                System.out.print("BeeMO: That's amazing! Rodents really are exceptional no matter what they do! Would you like to have another conversation?\n" + name + ": ");
             }
 
             repeatDiscussion(scan, discussionCount, name);
