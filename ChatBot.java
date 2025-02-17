@@ -22,14 +22,14 @@ public class ChatBot{
 
     public void discussion(int firstMessageType, Scanner scan, int discussionCount,String name){
         if (firstMessageType == 0){
-            System.out.println("What would you like to talk about? Here are some suggestions:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Burnout   ||");
+            System.out.println("What would you like to talk about? Here are some suggestions:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
         }
         if (firstMessageType == 1){
             if(tired){
-                System.out.println("Tired BeeMO: Again? Damn, well here are your options:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Burnout   ||");
+                System.out.println("Tired BeeMO: Again? Damn, well here are your options:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
             }
             else{
-                System.out.println("BeeMO: Alright, lets keep talking! Go ahead and choose our next topic:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Burnout   ||");
+                System.out.println("BeeMO: Alright, lets keep talking! Go ahead and choose our next topic:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
             }
         }
         if (firstMessageType == 2){
@@ -313,8 +313,44 @@ public class ChatBot{
 
 
 
-        else if (input.toLowerCase().contains("burnout")){
+        else if (input.toLowerCase().contains("Exhaustion")){
+            if (tired){
+                System.out.print("Tired BeeMO: Great topic, as I am very tired. Just like my developer when he wrote this. So here's a simple discussion branch. Do you like bread?\n" + name + ": ");
+            }
+            else{
+                System.out.print("BeeMO: What a coincidence, as my developer is very tired. So here's a nice and concise discussion branch for you to enjoy: Do you like bread?\n" + name + ": ");
+            }
 
+            input = scan.nextLine();
+
+            if (input.toLowerCase().contains("ye")){
+                if (tired){
+                    System.out.print("Tired BeeMO: Amazing. Wanna talk again?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: That's great, " + name + "! Do you want to have another conversation?\n" + name + ": ");
+                }
+
+                repeatDiscussion(scan, discussionCount, name);
+            }
+            else if (input.toLowerCase().contains("no")){
+                if (tired){
+                    System.out.print("Tired BeeMO: Damn. Wanna talk again?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: Well, to each their own. Do you want to have another conversation?\n" + name + ": ");
+                }
+
+                repeatDiscussion(scan, discussionCount, name);
+            }
+            else{
+                if (tired){
+                    System.out.print("Tired BeeMO: Can you not recognize a yes or no question when you see one? Oh well, Wanna talk again?\n" + name + ": ");
+                }
+                else{
+                    System.out.print("BeeMO: Sorry, I didn't quite understand your answer, so I'l just assume that you're a bread enthusiast. Do you want to have another conversation?\n" + name + ": ");
+                }
+            }
         }
 
         else if (input.toLowerCase().contains("stop") || input.toLowerCase().contains("bye")){
