@@ -4,6 +4,8 @@ public class ChatBot{
     //Bot tracks it's own state to see if it's tired
     boolean tired = false;
 
+    //kodo pakeitimo checkas su branchu "decoupling"
+
     //initializes the conversation by asking for a name and creating a scanner
     public static void main(String[] args){
 
