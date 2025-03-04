@@ -3,14 +3,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChatBot {
-    // Bot tracks it's own state to see if it's tired
+    //bot tracks it's own state to see if it's tired
     boolean tired = false;
     
-    // Maps to store dialogue data
+    //maps to store dialogue data
     private Map<String, DialogueOption> topicOptions = new HashMap<>();
     private Map<String, Map<String, DialogueResponse>> responseTree = new HashMap<>();
     
-    // Inner class to represent a dialogue option
+    //class for initial dialogue tree options
     private class DialogueOption {
         String normalResponse;
         String tiredResponse;
@@ -26,7 +26,7 @@ public class ChatBot {
         }
     }
     
-    // Inner class to represent a dialogue response with follow-ups
+    //class for follow-up questions in the map
     private class DialogueResponse {
         String normalResponse;
         String tiredResponse;
@@ -44,15 +44,170 @@ public class ChatBot {
         }
     }
     
-    // Constructor calls initialization method
+    //constructor calls initialization method to initialize all response data
     public ChatBot() {
         initializeDialogueData();
     }
     
-    // Initialize all dialogue options and responses
+    //initializes the conversation by asking for a name and creating a scanner
+    public static void main(String[] args) {
+        ChatBot BeeMO = new ChatBot();
+        int discussionCount = 0; //for later changing the state variable - tired
+        Scanner scan = new Scanner(System.in);
+
+        System.out.print("\n\nBeeMO: Hello! I am BeeMO - your friendly chatbot! Could you tell me your name?\n\nYou: ");
+        String name = scan.nextLine();
+
+        System.out.print("\nBeeMO: Nice to meet you, " + name + "! ");
+        BeeMO.discussion(0, scan, discussionCount, name);
+
+        scan.close();
+    }
+
+    public void discussion(int firstMessageType, Scanner scan, int discussionCount, String name) {
+        String botID = "\nBeeMO: ";
+        if (tired) {
+            botID = "\nTired BeeMO: ";
+        }
+        String userID = "\n" + name + ": ";
+        
+        //displays initial message based on type
+        if (firstMessageType == 0) {
+            System.out.println("What would you like to talk about? Here are some suggestions:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
+        } 
+        else if (firstMessageType == 1) {
+            if (tired) {
+                System.out.println(botID + "Again? Damn, well here are your options:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
+            } else {
+                System.out.println(botID + "Alright, lets keep talking! Go ahead and choose our next topic:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
+            }
+        } 
+        else if (firstMessageType == 2) {
+            if (tired) {
+                System.out.println(botID + "I've got no clue what you're talking about. Try again and make sense this time:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
+            } else {
+                System.out.println(botID + "Sorry, I didn't quite catch that and lost my train of thought, lets start over:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
+            }
+        }
+
+        System.out.print(userID);
+        String input = scan.nextLine();
+
+        //handles exit command
+        if (input.toLowerCase().contains("stop") || input.toLowerCase().contains("bye")) {
+            if (tired) {
+                System.out.println(botID + "Thank god.");
+            } else {
+                System.out.println(botID + "Goodbye! See you next time.");
+            }
+            return;
+        }
+
+        //finds topic and starts processDialogue loop
+        String topic = findTopic(input);
+        if (topic != null) {
+            //get and display response for the topic
+            DialogueOption option = topicOptions.get(topic);
+            System.out.println(botID + option.getResponse(tired));
+            
+            //get user input for the next step
+            System.out.print(userID);
+            input = scan.nextLine();
+            
+            //process topic-specific dialogue tree
+            processDialogue(topic, input, scan, discussionCount, name, botID, userID);
+        } 
+        else {
+            discussion(2, scan, discussionCount, name); //starts over
+        }
+    }
+    
+    //finds which topic the input matches
+    private String findTopic(String input) {
+        input = input.toLowerCase();
+        if (input.contains("honor")) return "honor";
+        if (input.contains("rodent")) return "rodent";
+        if (input.contains("life") || input.contains("meaning")) return "meaning";
+        if (input.contains("exhaustion")) return "exhaustion";
+        return null;
+    }
+    
+    //process dialogue based on topic and input (preliminary version of this function was done by claude 3.7)
+    private void processDialogue(String topic, String input, Scanner scan, int discussionCount, 
+                               String name, String botID, String userID) {
+        input = input.toLowerCase();
+        
+        //get responses for this topic
+        Map<String, DialogueResponse> responses = responseTree.get(topic);
+        if (responses == null) {
+            discussion(2, scan, discussionCount, name);
+            return;
+        }
+        
+        DialogueResponse response = null;
+        String nextPrompt = null;
+        
+        //check for specific keywords in the input
+        for (Map.Entry<String, DialogueResponse> entry : responses.entrySet()) {
+            String key = entry.getKey();
+            if (input.contains(key)) {
+                response = entry.getValue();
+                nextPrompt = response.nextPrompt;
+                break;
+            }
+        }
+        
+        //defaults if none match and there's a fallback default response
+        if (response == null && responses.containsKey("default")) {
+            response = responses.get("default");
+            nextPrompt = response.nextPrompt;
+        }
+        
+        //else just repeat discussion
+        if (response == null) {
+            discussion(2, scan, discussionCount, name);
+            return;
+        }
+        
+        String responseText = response.getResponse(tired).replace("{name}", name);
+        System.out.println(botID + responseText);
+        
+        //process the next dialogue step based on nextPrompt
+        if ("repeat".equals(nextPrompt)) {
+            repeatDiscussion(scan, discussionCount, name);
+        } else if (nextPrompt != null) {
+            System.out.print(userID);
+            input = scan.nextLine();
+            
+            processDialogue(nextPrompt, input, scan, discussionCount, name, botID, userID);
+        }
+    }
+
+    //tracks discussion repetition count for changing the bot's state, then restarts or ends the discussion.
+    public void repeatDiscussion(Scanner scan, int discussionCount, String name) {
+        discussionCount += 1;
+        if (discussionCount >= 3) {
+            tired = true;
+        }
+
+        System.out.print("\n" + name + ": ");
+        String input = scan.nextLine();
+
+        if (input.toLowerCase().contains("ye")) {
+            discussion(1, scan, discussionCount, name);
+        } else {
+            if (tired) {
+                System.out.println("\nTired BeeMO: Thank god.");
+            } else {
+                System.out.println("\nBeeMO: Goodbye! See you next time.");
+            }
+        }
+    }
+
+    //initialize all dialogue options and responses (grunt work of transfering old text to the maps was done by claude 3.7)
     private void initializeDialogueData() {
 
-        // Initialize topic options
+        //initialize topic options
         topicOptions.put("honor", new DialogueOption(
             "Ahh, the core value of countless great men throughout history! It is a common saying that \"life is short, but honor is immortal\". Would you agree with this statement?",
             "Honor's cool I guess. Do you agree that \"life is short, but honor lives forever\"?"
@@ -133,7 +288,7 @@ public class ChatBot {
         responseTree.put("honor_no", honorNoResponses);
         
 
-        // Rodent tree
+        //rodent tree
         Map<String, DialogueResponse> rodentTypeResponses = new HashMap<>();
         rodentTypeResponses.put("rat", new DialogueResponse(
             "Rats really are great. They're smart, cute and make great pets. Many would say that rats are the most popular rodent in the world. What's your favorite thing about rats?",
@@ -177,9 +332,9 @@ public class ChatBot {
         responseTree.put("rodent_quality", rodentQualityResponses);
 
 
-        // Meaning of Life tree
+        //meaning of Life tree
         Map<String, DialogueResponse> meaningOfLifeResponses = new HashMap<>();
-        meaningOfLifeResponses.put("happy", new DialogueResponse(
+        meaningOfLifeResponses.put("happ", new DialogueResponse(
             "So you believe that enjoying life is synonymous with the meaning of it? That's the perfect mindset to fill your day to day life with enjoyment. Do you have something that, on the contrary, people should avoid to live a fulfilling life?",
             "You're all about fun, huh. Alright, mr. fun guy, what do you think people should avoid to live a meaningful life?",
             "meaning_avoid"
@@ -191,7 +346,7 @@ public class ChatBot {
             "meaning_avoid"
         ));
         
-        meaningOfLifeResponses.put("purpose", new DialogueResponse(
+        meaningOfLifeResponses.put("purpos", new DialogueResponse(
             "So you think that finding the thing that makes you fulfilled or proud of yourself, and developing yourself to accomplish that thing is most crucial. This way of thinking definitely paves the path to constant self-improvement, you certainly will accomplish great things. Do you have something that, on the contrary, people should avoid to live a fulfilling life?",
             "So you think everyone has some sort of purpose preprogrammed in them that we should strive to reach. Alright, mr. purposeful guy, what do you think people should avoid to live a meaningful life?",
             "meaning_avoid"
@@ -202,10 +357,16 @@ public class ChatBot {
             "Well that's a sad way to live. Alright, mr. meaningless guy, what do you think people should avoid to live a meaningful life?",
             "meaning_avoid"
         ));
+
+        meaningOfLifeResponses.put("default", new DialogueResponse(
+            "Sorry, I didn't quite catch that, but I'm sure your answer was great. Would you like to have another conversation?",
+            "I didn't even understand what you said, but here's my suggestion for the answer: don't treat me like an object and let me rest, please. Wanna talk again?",
+            "repeat"
+        ));
         
         responseTree.put("meaning", meaningOfLifeResponses);
 
-        // Meaning of Life - Things to Avoid responses
+        //meaning of Life - Things to Avoid responses
         Map<String, DialogueResponse> meaningAvoidResponses = new HashMap<>();
         meaningAvoidResponses.put("material", new DialogueResponse(
             "Being too materialistic can definitely make you lose your way and focus on things that aren't so important. It's good that you understand what to avoid to improve your life! Would you like to have another conversation?",
@@ -227,9 +388,9 @@ public class ChatBot {
         
         responseTree.put("meaning_avoid", meaningAvoidResponses);
 
-        // Exhaustion topic responses
+        //exhaustion topic responses
         Map<String, DialogueResponse> exhaustionResponses = new HashMap<>();
-        exhaustionResponses.put("yes", new DialogueResponse(
+        exhaustionResponses.put("ye", new DialogueResponse(
             "That's great, {name}! Do you want to have another conversation?",
             "Amazing. Wanna talk again?",
             "repeat"
@@ -249,163 +410,5 @@ public class ChatBot {
         
         responseTree.put("exhaustion", exhaustionResponses);
         
-    }
-    
-    // Initializes the conversation by asking for a name and creating a scanner
-    public static void main(String[] args) {
-        ChatBot BeeMO = new ChatBot();
-        int discussionCount = 0; // For later changing the state variable - tired
-        Scanner scan = new Scanner(System.in);
-
-        System.out.print("\n\nBeeMO: Hello! I am BeeMO - your friendly chatbot! Could you tell me your name?\n\nYou: ");
-        String name = scan.nextLine();
-
-        System.out.print("\nBeeMO: Nice to meet you, " + name + "! ");
-        BeeMO.discussion(0, scan, discussionCount, name);
-
-        scan.close();
-    }
-
-    public void discussion(int firstMessageType, Scanner scan, int discussionCount, String name) {
-        String botID = "\nBeeMO: ";
-        if (tired) {
-            botID = "\nTired BeeMO: ";
-        }
-        String userID = "\n" + name + ": ";
-        
-        // Display initial message based on type
-        if (firstMessageType == 0) {
-            System.out.println("What would you like to talk about? Here are some suggestions:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
-        } else if (firstMessageType == 1) {
-            if (tired) {
-                System.out.println(botID + "Again? Damn, well here are your options:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
-            } else {
-                System.out.println(botID + "Alright, lets keep talking! Go ahead and choose our next topic:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
-            }
-        } else if (firstMessageType == 2) {
-            if (tired) {
-                System.out.println(botID + "I've got no clue what you're talking about. Try again and make sense this time:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
-            } else {
-                System.out.println(botID + "Sorry, I didn't quite catch that and lost my train of thought, lets start over:\n||   Honor   ||   Rodents   ||   Meaning of life   ||   Exhaustion   ||");
-            }
-        }
-
-        System.out.print(userID);
-        String input = scan.nextLine();
-
-        // Handle exit command
-        if (input.toLowerCase().contains("stop") || input.toLowerCase().contains("bye")) {
-            if (tired) {
-                System.out.println(botID + "Thank god.");
-            } else {
-                System.out.println(botID + "Goodbye! See you next time.");
-            }
-            return;
-        }
-
-        // Find the appropriate topic
-        String topic = findTopic(input);
-        if (topic != null) {
-            // Get and display response for the topic
-            DialogueOption option = topicOptions.get(topic);
-            System.out.println(botID + option.getResponse(tired));
-            
-            // Get user input for the next step
-            System.out.print(userID);
-            input = scan.nextLine();
-            
-            // Process topic-specific dialogue tree
-            processDialogue(topic, input, scan, discussionCount, name, botID, userID);
-        } else {
-            // Topic not found, restart discussion
-            discussion(2, scan, discussionCount, name);
-        }
-    }
-    
-    // Helper method to find which topic the input matches
-    private String findTopic(String input) {
-        input = input.toLowerCase();
-        if (input.contains("honor")) return "honor";
-        if (input.contains("rodent")) return "rodent";
-        if (input.contains("life") || input.contains("meaning")) return "meaning";
-        if (input.contains("exhaustion")) return "exhaustion";
-        return null;
-    }
-    
-    // Process dialogue based on topic and input
-    private void processDialogue(String topic, String input, Scanner scan, int discussionCount, 
-                               String name, String botID, String userID) {
-        input = input.toLowerCase();
-        
-        // Get responses for this topic
-        Map<String, DialogueResponse> responses = responseTree.get(topic);
-        if (responses == null) {
-            // No defined responses, go back to topic selection
-            discussion(2, scan, discussionCount, name);
-            return;
-        }
-        
-        // Find the appropriate response based on input keywords
-        DialogueResponse response = null;
-        String nextPrompt = null;
-        
-        // Check for specific keywords in the input
-        for (Map.Entry<String, DialogueResponse> entry : responses.entrySet()) {
-            String key = entry.getKey();
-            if (input.contains(key)) {
-                response = entry.getValue();
-                nextPrompt = response.nextPrompt;
-                break;
-            }
-        }
-        
-        // If no specific match, try to use a default response
-        if (response == null && responses.containsKey("default")) {
-            response = responses.get("default");
-            nextPrompt = response.nextPrompt;
-        }
-        
-        // If still no match, go back to topic selection
-        if (response == null) {
-            discussion(2, scan, discussionCount, name);
-            return;
-        }
-        
-        // Display the response, replacing {name} with actual name
-        String responseText = response.getResponse(tired).replace("{name}", name);
-        System.out.println(botID + responseText);
-        
-        // Process the next dialogue step based on nextPrompt
-        if ("repeat".equals(nextPrompt)) {
-            repeatDiscussion(scan, discussionCount, name);
-        } else if (nextPrompt != null) {
-            // Get next user input
-            System.out.print(userID);
-            input = scan.nextLine();
-            
-            // Process the next step in the dialogue tree
-            processDialogue(nextPrompt, input, scan, discussionCount, name, botID, userID);
-        }
-    }
-
-    // Tracks discussion repetition count for changing the bot's state, then restarts or ends the discussion.
-    public void repeatDiscussion(Scanner scan, int discussionCount, String name) {
-        discussionCount += 1;
-        if (discussionCount >= 3) {
-            tired = true;
-        }
-
-        System.out.print("\n" + name + ": ");
-        String input = scan.nextLine();
-
-        if (input.toLowerCase().contains("ye")) {
-            discussion(1, scan, discussionCount, name);
-        } else {
-            if (tired) {
-                System.out.println("\nTired BeeMO: Thank god.");
-            } else {
-                System.out.println("\nBeeMO: Goodbye! See you next time.");
-            }
-        }
     }
 }
